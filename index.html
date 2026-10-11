@@ -1,1 +1,569 @@
-# Fajny-sklep
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOVA — Twój sklep</title>
+
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f5f5f2;color:#202520;font:16px system-ui,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0;border-radius:12px;padding:13px 18px;background:#253f32;color:white}
+button:hover{filter:brightness(1.15)}
+button:disabled{opacity:.5;cursor:default}
+header{background:white;border-bottom:1px solid #ddd;position:sticky;top:0;z-index:2}
+nav,main,footer{max-width:1120px;margin:auto;padding:22px}
+nav{display:flex;align-items:center;justify-content:space-between}
+.brand{font-size:27px;font-weight:900;letter-spacing:3px}
+.hero{border-radius:24px;background:#dce8da;padding:48px;margin:18px 0 32px}
+h1{font-size:clamp(36px,6vw,64px);line-height:1.05;margin:14px 0;max-width:650px}
+.hero p{max-width:500px;color:#4b5b4a;line-height:1.7}
+.badge{font-size:12px;font-weight:700;letter-spacing:2px}
+.tools{display:flex;gap:12px;margin-bottom:24px}
+input,select{padding:14px;border:1px solid #ccc;border-radius:10px;background:white;min-width:0}
+#search{flex:1}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+.card{background:white;border:1px solid #e4e5df;padding:16px;border-radius:18px}
+.art{height:180px;border-radius:12px;overflow:hidden;background:#efefec}
+.art img{width:100%;height:100%;object-fit:contain;display:block}
+.card small{display:block;color:#697367;margin-top:18px}
+.card h3{margin:8px 0 18px;font-size:19px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.price{font-weight:800;font-size:20px}
+dialog{border:0;border-radius:20px;width:min(620px,95vw);padding:26px;max-height:90vh;overflow:auto;background:white;color:#202520}
+dialog::backdrop{background:#0008}
+.close{background:#eee;color:#222;padding:8px 12px}
+.line{padding:16px 0;border-bottom:1px solid #ddd;display:flex;gap:12px;align-items:center}
+.line div:first-child{flex:1}
+.qty{display:flex;gap:8px;align-items:center}
+.qty button{padding:5px 10px}
+.remove{background:transparent;color:#8d3636;padding:8px}
+.summary{margin:22px 0;display:grid;gap:12px}
+form{display:grid;gap:12px}
+label{display:grid;gap:6px;font-size:14px}
+.check{display:flex;align-items:flex-start;line-height:1.5}
+.notice{background:#fff2cc;padding:14px;border-radius:10px;font-size:14px;line-height:1.5}
+#toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#253f32;color:white;padding:14px 22px;border-radius:12px;z-index:5}
+footer{color:#687267;margin-top:40px;font-size:14px}
+.success{background:#edf7ef;padding:20px;border-radius:14px}
+a{color:#253f32}
+.product-open{display:block;width:100%;padding:0;background:transparent;color:inherit;text-align:left;border-radius:12px}
+.product-open:hover{filter:none}
+.product-open h3{margin-bottom:8px}
+.spec-hint{display:block;margin-bottom:18px;color:#52674e;font-size:14px}
+.spec-table{width:100%;border-collapse:collapse;margin:16px 0 24px}
+.spec-table th,.spec-table td{text-align:left;padding:12px 8px;border-bottom:1px solid #ddd;overflow-wrap:anywhere}
+.spec-table th{width:42%;font-weight:500;color:#596556}
+#productDescription{line-height:1.7}
+#productArt{height:260px}
+.photo-note{margin-top:10px;color:#687267;font-size:12px}
+
+@media(max-width:700px){
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .hero{padding:28px}
+  .art{height:140px}
+  .card .row{align-items:stretch;flex-direction:column}
+  .tools{flex-direction:column}
+  nav,main{padding:16px}
+}
+@media(max-width:380px){
+  .grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <nav>
+    <span class="brand">NOVA<span style="color:#7b9a70">.</span></span>
+    <button id="openCart">Koszyk <span id="count">0</span></button>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <span class="badge">MAŁE RZECZY. DUŻA RÓŻNICA.</span>
+    <h1>Dobry wybór<br>na każdy dzień.</h1>
+    <p>Akcesoria do pracy, muzyki i codziennych przygód. Znajdź coś dla siebie.</p>
+    <a href="#catalog">Odkryj kolekcję ↓</a>
+  </section>
+
+  <div class="notice">
+    Sklep demonstracyjny. Produkty i specyfikacje są przykładowe.
+    Zamówienie jest symulacją — bez płatności i wysyłki.
+  </div>
+
+  <h2 id="catalog">Nasza kolekcja</h2>
+
+  <div class="tools">
+    <input id="search" aria-label="Szukaj produktów" placeholder="Szukaj produktu…">
+    <select id="category" aria-label="Kategoria">
+      <option>Wszystkie</option>
+      <option>Audio</option>
+      <option>Gaming</option>
+      <option>Akcesoria</option>
+    </select>
+    <select id="sort" aria-label="Sortowanie">
+      <option value="default">Polecane</option>
+      <option value="asc">Cena rosnąco</option>
+      <option value="desc">Cena malejąco</option>
+    </select>
+  </div>
+
+  <div id="products" class="grid"></div>
+</main>
+
+<footer>
+  NOVA • Sklep demonstracyjny • Dostawa 14,99 zł, od 399 zł gratis.
+</footer>
+
+<dialog id="productDialog" aria-labelledby="productTitle">
+  <div class="row">
+    <h2 id="productTitle"></h2>
+    <button class="close" data-close="productDialog" aria-label="Zamknij szczegóły">✕</button>
+  </div>
+  <div id="productArt" class="art"></div>
+  <p class="photo-note">Zdjęcie ilustracyjne produktu demonstracyjnego.</p>
+  <p id="productDescription"></p>
+  <h3>Specyfikacja</h3>
+  <small>Przykładowe parametry produktu demonstracyjnego.</small>
+  <table class="spec-table">
+    <tbody id="productSpecs"></tbody>
+  </table>
+  <div class="row">
+    <strong id="productPrice" class="price"></strong>
+    <button id="productAdd">Dodaj do koszyka +</button>
+  </div>
+</dialog>
+
+<dialog id="cartDialog">
+  <div class="row">
+    <h2>Twój koszyk</h2>
+    <button class="close" data-close="cartDialog" aria-label="Zamknij koszyk">✕</button>
+  </div>
+  <div id="cartItems"></div>
+  <div id="totals" class="summary"></div>
+  <button id="checkout" style="width:100%">Przejdź do zamówienia</button>
+</dialog>
+
+<dialog id="checkoutDialog">
+  <div class="row">
+    <h2>Dostawa i zamówienie</h2>
+    <button class="close" data-close="checkoutDialog" aria-label="Zamknij formularz">✕</button>
+  </div>
+
+  <form id="orderForm">
+    <label>
+      Imię i nazwisko
+      <input name="name" required minlength="2" maxlength="200" autocomplete="name">
+    </label>
+
+    <label>
+      E-mail
+      <input name="email" type="email" required maxlength="200" autocomplete="email">
+    </label>
+
+    <label>
+      Ulica i numer
+      <input name="address" required minlength="2" maxlength="200" autocomplete="street-address">
+    </label>
+
+    <div class="row">
+      <label>
+        Kod pocztowy
+        <input name="postal" required pattern="[0-9]{2}-[0-9]{3}" placeholder="00-000" autocomplete="postal-code">
+      </label>
+      <label>
+        Miasto
+        <input name="city" required minlength="2" maxlength="200" autocomplete="address-level2">
+      </label>
+    </div>
+
+    <div class="notice">
+      Tryb testowy. Użyj przykładowych danych.
+      Formularz nie wysyła danych do sprzedawcy i nie pobiera pieniędzy.
+    </div>
+
+    <label class="check">
+      <input type="checkbox" required>
+      Rozumiem, że to zamówienie testowe, bez płatności i wysyłki.
+    </label>
+
+    <strong id="checkoutTotal"></strong>
+    <button>Złóż zamówienie testowe</button>
+  </form>
+</dialog>
+
+<dialog id="successDialog">
+  <div class="row">
+    <h2>Gotowe!</h2>
+    <button class="close" data-close="successDialog" aria-label="Zamknij potwierdzenie">✕</button>
+  </div>
+  <div class="success">
+    <p>Symulacja zamówienia zakończona.</p>
+    <strong id="orderNumber"></strong>
+    <p id="orderAmount"></p>
+    <p>Zamówienie nie zostało wysłane do sprzedawcy. Nie pobrano pieniędzy.</p>
+  </div>
+</dialog>
+
+<div id="toast" role="status" hidden></div>
+
+<script>
+const products = [
+  {
+    id: 1,
+    name: "Słuchawki Pulse",
+    category: "Audio",
+    price: 19900,
+    image: "assets/product-1.webp",
+    description: "Bezprzewodowe słuchawki nauszne do muzyki, rozmów i codziennej pracy.",
+    specs: {
+      "Łączność": "Bluetooth 5.3 / przewód 3,5 mm",
+      "Przetworniki": "40 mm",
+      "Czas pracy": "Do 30 godzin",
+      "Ładowanie": "USB-C",
+      "Mikrofon": "Wbudowany",
+      "Waga": "230 g"
+    }
+  },
+  {
+    id: 2,
+    name: "Klawiatura Mechanical",
+    category: "Gaming",
+    price: 24900,
+    image: "assets/product-2.webp",
+    description: "Kompaktowa klawiatura mechaniczna z podświetleniem do pracy i grania.",
+    specs: {
+      "Układ": "US QWERTY, 87 klawiszy",
+      "Przełączniki": "Mechaniczne, liniowe",
+      "Podświetlenie": "RGB",
+      "Łączność": "Przewodowa USB-C",
+      "Obudowa": "ABS",
+      "W zestawie": "Klawiatura i przewód USB"
+    }
+  },
+  {
+    id: 3,
+    name: "Mysz Speed",
+    category: "Gaming",
+    price: 12900,
+    image: "assets/product-3.webp",
+    description: "Lekka mysz do gier z regulowaną czułością i programowalnymi przyciskami.",
+    specs: {
+      "Sensor": "Optyczny",
+      "Czułość": "800–12 000 DPI",
+      "Przyciski": "6",
+      "Łączność": "USB, przewód 1,8 m",
+      "Częstotliwość raportowania": "1000 Hz",
+      "Waga": "75 g"
+    }
+  },
+  {
+    id: 4,
+    name: "Głośnik Mini",
+    category: "Audio",
+    price: 15900,
+    image: "assets/product-4.webp",
+    description: "Przenośny głośnik do słuchania muzyki w domu i w podróży.",
+    specs: {
+      "Moc": "10 W",
+      "Łączność": "Bluetooth 5.3",
+      "Czas pracy": "Do 12 godzin",
+      "Ładowanie": "USB-C",
+      "Odporność": "IPX5",
+      "Waga": "360 g"
+    }
+  },
+  {
+    id: 5,
+    name: "Smartwatch Active",
+    category: "Akcesoria",
+    price: 29900,
+    image: "assets/product-5.webp",
+    description: "Zegarek z podstawowymi funkcjami aktywności i powiadomieniami z telefonu.",
+    specs: {
+      "Ekran": "1,43 cala AMOLED",
+      "Łączność": "Bluetooth",
+      "Czas pracy": "Do 7 dni",
+      "Funkcje": "Kroki, tętno, powiadomienia",
+      "Kompatybilność": "Android / iOS",
+      "Pasek": "Silikonowy, 22 mm"
+    }
+  },
+  {
+    id: 6,
+    name: "Plecak Everyday",
+    category: "Akcesoria",
+    price: 17900,
+    image: "assets/product-6.webp",
+    description: "Uniwersalny plecak z kieszenią na laptop oraz organizerem na drobiazgi.",
+    specs: {
+      "Pojemność": "20 litrów",
+      "Kieszeń na laptop": "Do 15,6 cala",
+      "Materiał": "Poliester",
+      "Wymiary": "44 × 30 × 15 cm",
+      "Waga": "650 g",
+      "Kolor": "Czarny"
+    }
+  }
+];
+
+const $ = id => document.getElementById(id);
+const money = value => new Intl.NumberFormat("pl-PL", {
+  style: "currency",
+  currency: "PLN"
+}).format(value / 100);
+
+let cart = {};
+let timer;
+
+try {
+  const saved = JSON.parse(localStorage.getItem("nova-cart") || "{}");
+  if (saved && typeof saved === "object" && !Array.isArray(saved)) {
+    cart = saved;
+  }
+} catch {}
+
+for (const id of Object.keys(cart)) {
+  if (
+    !products.some(p => String(p.id) === id) ||
+    !Number.isInteger(cart[id]) ||
+    cart[id] < 1 ||
+    cart[id] > 10
+  ) {
+    delete cart[id];
+  }
+}
+
+function persist() {
+  try {
+    localStorage.setItem("nova-cart", JSON.stringify(cart));
+  } catch {}
+  renderCart();
+}
+
+function toast(text) {
+  $("toast").textContent = text;
+  $("toast").hidden = false;
+  clearTimeout(timer);
+  timer = setTimeout(() => {
+    $("toast").hidden = true;
+  }, 2000);
+}
+
+function totals() {
+  const subtotal = products.reduce(
+    (sum, p) => sum + p.price * (cart[p.id] || 0),
+    0
+  );
+  const delivery = subtotal === 0 || subtotal >= 39900 ? 0 : 1499;
+  return { subtotal, delivery, total: subtotal + delivery };
+}
+
+function addProduct(id) {
+  if ((cart[id] || 0) >= 10) {
+    toast("Maksymalnie 10 sztuk produktu");
+    return;
+  }
+  cart[id] = (cart[id] || 0) + 1;
+  persist();
+  toast("Dodano do koszyka");
+}
+
+function showProduct(product) {
+  $("productTitle").textContent = product.name;
+  $("productDescription").textContent = product.description;
+  $("productPrice").textContent = money(product.price);
+
+  const photo = document.createElement("img");
+  photo.src = product.image;
+  photo.alt = product.name;
+  $("productArt").replaceChildren(photo);
+
+  $("productSpecs").replaceChildren();
+
+  for (const [name, value] of Object.entries(product.specs)) {
+    const row = document.createElement("tr");
+    const label = document.createElement("th");
+    const cell = document.createElement("td");
+
+    label.scope = "row";
+    label.textContent = name;
+    cell.textContent = value;
+
+    row.append(label, cell);
+    $("productSpecs").append(row);
+  }
+
+  $("productAdd").onclick = () => addProduct(product.id);
+  $("productDialog").showModal();
+}
+
+function renderProducts() {
+  let list = products.filter(product =>
+    product.name.toLocaleLowerCase("pl").includes(
+      $("search").value.toLocaleLowerCase("pl")
+    ) &&
+    (
+      $("category").value === "Wszystkie" ||
+      product.category === $("category").value
+    )
+  );
+
+  if ($("sort").value !== "default") {
+    list.sort((a, b) =>
+      $("sort").value === "asc" ? a.price - b.price : b.price - a.price
+    );
+  }
+
+  $("products").replaceChildren();
+
+  for (const product of list) {
+    const card = document.createElement("article");
+    card.className = "card";
+
+    card.innerHTML = `
+      <button class="product-open"
+        aria-label="Zobacz specyfikację: ${product.name}">
+        <div class="art">
+          <img src="${product.image}" alt="${product.name}"
+            loading="lazy" width="400" height="400">
+        </div>
+        <small>${product.category}</small>
+        <h3>${product.name}</h3>
+        <span class="spec-hint">Zobacz specyfikację →</span>
+      </button>
+      <div class="row">
+        <span class="price">${money(product.price)}</span>
+        <button class="add-cart">Do koszyka +</button>
+      </div>
+    `;
+
+    card.querySelector(".product-open").onclick = () => showProduct(product);
+    card.querySelector(".add-cart").onclick = () => addProduct(product.id);
+    $("products").append(card);
+  }
+
+  if (!list.length) {
+    $("products").textContent = "Nie znaleziono produktów.";
+  }
+}
+
+function change(id, amount) {
+  if (amount > 0 && cart[id] >= 10) {
+    toast("Maksymalnie 10 sztuk");
+    return;
+  }
+
+  cart[id] += amount;
+
+  if (cart[id] <= 0) {
+    delete cart[id];
+  }
+
+  persist();
+}
+
+function renderCart() {
+  $("count").textContent = Object.values(cart).reduce(
+    (sum, quantity) => sum + quantity,
+    0
+  );
+
+  $("cartItems").replaceChildren();
+
+  for (const product of products) {
+    if (!cart[product.id]) continue;
+
+    const line = document.createElement("div");
+    line.className = "line";
+    line.innerHTML = `
+      <div>
+        <strong>${product.name}</strong><br>
+        <small>${money(product.price)}</small>
+      </div>
+      <div class="qty">
+        <button aria-label="Zmniejsz ilość">−</button>
+        <span>${cart[product.id]}</span>
+        <button aria-label="Zwiększ ilość">+</button>
+      </div>
+      <button class="remove" aria-label="Usuń produkt">✕</button>
+    `;
+
+    const buttons = line.querySelectorAll("button");
+    buttons[0].onclick = () => change(product.id, -1);
+    buttons[1].onclick = () => change(product.id, 1);
+    buttons[2].onclick = () => {
+      delete cart[product.id];
+      persist();
+    };
+
+    $("cartItems").append(line);
+  }
+
+  const amount = totals();
+
+  if (!amount.subtotal) {
+    $("cartItems").textContent = "Twój koszyk jest pusty.";
+  }
+
+  $("totals").innerHTML = `
+    <div class="row">
+      <span>Produkty</span>
+      <strong>${money(amount.subtotal)}</strong>
+    </div>
+    <div class="row">
+      <span>Dostawa</span>
+      <strong>${money(amount.delivery)}</strong>
+    </div>
+    <div class="row">
+      <strong>Razem</strong>
+      <strong>${money(amount.total)}</strong>
+    </div>
+  `;
+
+  $("checkout").disabled = !amount.subtotal;
+}
+
+$("openCart").onclick = () => $("cartDialog").showModal();
+
+document.querySelectorAll("[data-close]").forEach(button => {
+  button.onclick = () => $(button.dataset.close).close();
+});
+
+["search", "category", "sort"].forEach(id => {
+  $(id).addEventListener("input", renderProducts);
+});
+
+$("checkout").onclick = () => {
+  $("cartDialog").close();
+  $("checkoutTotal").textContent = "Razem: " + money(totals().total);
+  $("checkoutDialog").showModal();
+};
+
+$("orderForm").onsubmit = event => {
+  event.preventDefault();
+
+  if (!totals().subtotal) return;
+
+  $("orderNumber").textContent =
+    "DEMO-" + Date.now().toString(36).toUpperCase();
+
+  $("orderAmount").textContent =
+    "Wartość testowa: " + money(totals().total);
+
+  cart = {};
+  persist();
+  event.target.reset();
+
+  $("checkoutDialog").close();
+  $("successDialog").showModal();
+};
+
+renderProducts();
+persist();
+</script>
+</body>
+</html>
